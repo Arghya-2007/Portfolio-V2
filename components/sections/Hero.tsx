@@ -15,8 +15,9 @@ import { profile } from '@/data/profile';
 import GlassButton from '@/components/ui/GlassButton';
 import MagneticWrapper from '@/components/ui/MagneticWrapper';
 import { useScrollAnimation, useReducedScrollReveal } from '@/lib/gsap/useScrollAnimation';
-import { splitWords, revertSplit } from '@/lib/gsap/splitWords';
+import { splitText, revertSplit } from '@/lib/gsap/splitText';
 import { useMotionPreference } from '@/lib/hooks/useReducedMotion';
+import { useFlyInReveal } from '@/lib/gsap/useFlyInReveal';
 
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
@@ -24,16 +25,17 @@ export default function Hero() {
   const taglineRef = useRef<HTMLParagraphElement>(null);
   const motionPreference = useMotionPreference();
 
+  // Kinetic Text Effect for H1
+  useFlyInReveal(h1Ref);
+
   // Handle GSAP entrance animation and parallax
   useScrollAnimation(containerRef, (ctx, el) => {
-    const h1 = h1Ref.current;
     const tagline = taglineRef.current;
 
-    if (!h1 || !tagline) return;
+    if (!tagline) return;
 
-    // Split text into words
-    const h1Words = splitWords(h1);
-    const taglineWords = splitWords(tagline);
+    // Split text into words/chars
+    const taglineSplit = splitText(tagline, { type: 'character' });
 
     const tl = gsap.timeline();
 
@@ -44,37 +46,21 @@ export default function Hero() {
       { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', delay: 0.2 }
     );
 
-    // 2. H1 words stagger
-    if (h1Words.length > 0) {
+    // 3. Tagline characters stagger
+    if (taglineSplit.chars.length > 0) {
       tl.fromTo(
-        h1Words,
-        { opacity: 0, y: 30, filter: 'blur(8px)' },
+        taglineSplit.chars,
+        { opacity: 0, y: 15, scale: 1.05, filter: 'blur(8px)' },
         {
           opacity: 1,
           y: 0,
-          filter: 'blur(0px)',
-          duration: 0.9,
-          ease: 'power3.out',
-          stagger: 0.06
-        },
-        '-=0.3'
-      );
-    }
-
-    // 3. Tagline words stagger
-    if (taglineWords.length > 0) {
-      tl.fromTo(
-        taglineWords,
-        { opacity: 0, y: 20, filter: 'blur(4px)' },
-        {
-          opacity: 1,
-          y: 0,
+          scale: 1,
           filter: 'blur(0px)',
           duration: 0.8,
           ease: 'power3.out',
-          stagger: 0.03
+          stagger: 0.015
         },
-        '-=0.5'
+        '0.8' // Start slightly after fly-in begins
       );
     }
 
@@ -109,7 +95,6 @@ export default function Hero() {
 
     // Cleanup split text on unmount
     return () => {
-      revertSplit(h1);
       revertSplit(tagline);
     };
   });
@@ -127,6 +112,8 @@ export default function Hero() {
       aria-label="Hero — introduction"
       className="relative min-h-screen flex flex-col justify-center overflow-hidden"
     >
+      {/* Kinetic Distortion SVG removed — replaced with CSS GSAP transforms */}
+
       {/* Background image — priority loaded (above fold) */}
       <Image
         src="/images/bg/bg-2.webp"
@@ -159,15 +146,35 @@ export default function Hero() {
           </div>
 
           {/* H1 — single heading for entire site */}
-          <h1
-            ref={h1Ref}
-            className={`font-display font-bold text-fluid-h1 display-type text-text-primary mb-4 ${fallbackRevealClass}`}
-          >
-            {/* Gradient accent on first name — the "energetic focal point" (Design.md §5) */}
-            <span className="text-gradient">{profile.name.split(' ')[0]}</span>
-            {' '}
-            <span>{profile.name.split(' ').slice(1).join(' ')}</span>
-          </h1>
+          <div className="relative group">
+            <h1
+              ref={h1Ref}
+              className={`font-display font-bold text-fluid-h1 display-type text-text-primary mb-4 ${fallbackRevealClass}`}
+              style={{
+                // For the glow effect:
+                '--glow-opacity': 0,
+                position: 'relative',
+              } as React.CSSProperties}
+            >
+              {/* Glow Overlay */}
+              {motionPreference === 'full' && (
+                <div
+                  className="pointer-events-none absolute z-10 transition-opacity duration-300"
+                  style={{
+                    top: '-150px', left: '-150px', right: '-150px', bottom: '-150px',
+                    opacity: 'var(--glow-opacity)',
+                    background: 'radial-gradient(circle 120px at calc(var(--mouse-x, 50%) + 150px) calc(var(--mouse-y, 50%) + 150px), rgba(255,255,255,0.15) 0%, transparent 100%)',
+                    mixBlendMode: 'color-dodge',
+                  }}
+                  aria-hidden="true"
+                />
+              )}
+              {/* Gradient accent on first name — the "energetic focal point" (Design.md §5) */}
+              <span className="text-gradient relative z-20">{profile.name.split(' ')[0]}</span>
+              {' '}
+              <span className="relative z-20">{profile.name.split(' ').slice(1).join(' ')}</span>
+            </h1>
+          </div>
 
           {/* Role tagline */}
           <p ref={taglineRef} className={`font-body text-xl sm:text-2xl text-text-secondary mb-5 max-w-2xl leading-display ${fallbackRevealClass}`}>

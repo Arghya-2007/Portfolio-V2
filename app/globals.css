@@ -110,13 +110,27 @@
 @layer utilities {
 
   /* --- Text Gradient (headline highlight — use sparingly, Hero only) ------ */
-  .text-gradient,
-  .text-gradient .word-split {
+  .text-gradient {
     background: var(--text-gradient);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     /* Prevent clipping on descenders */
+    padding-bottom: 0.05em;
+  }
+
+  /* When split into characters for GSAP, we map the gradient across them 
+     so it doesn't restart per character, and remains visible while transformed. */
+  .text-gradient .char-split {
+    background-image: var(--text-gradient);
+    /* Stretch the gradient very wide so we can pan it */
+    background-size: calc(var(--char-total, 1) * 100%) 100%;
+    /* Position it based on this character's index */
+    background-position: calc(var(--char-index, 0) * 100% / max(1, var(--char-total, 1) - 1)) center;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     padding-bottom: 0.05em;
   }
 

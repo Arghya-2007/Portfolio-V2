@@ -4,6 +4,10 @@
 // Used in every section to replace repeated inline markup.
 // Mono label (JetBrains Mono) + Display heading (Bricolage Grotesque).
 
+import { useRef } from 'react';
+import { useFlyInReveal } from '@/lib/gsap/useFlyInReveal';
+import { useMotionPreference } from '@/lib/hooks/useReducedMotion';
+
 interface SectionHeadingProps {
   /** Two-digit section number, e.g. "01" */
   number: string;
@@ -27,6 +31,13 @@ export default function SectionHeading({
   id,
   className = "",
 }: SectionHeadingProps) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const motionPreference = useMotionPreference();
+  // Use kinetic text effect for main headings
+  useFlyInReveal(headingRef);
+  
+  const fallbackRevealClass = motionPreference !== 'full' ? 'reveal-hidden' : '';
+
   return (
     <div className={`mb-10 ${className}`}>
       {/* Mono section-number convention: "01 / About" */}
@@ -39,13 +50,36 @@ export default function SectionHeading({
         {label}
       </p>
 
+      {/* Kinetic Distortion SVG removed — replaced with CSS GSAP transforms */}
+
       {/* Display heading — fluid size, display-type letter-spacing */}
-      <h2
-        id={id}
-        className="font-display text-fluid-h2 font-bold text-text-primary display-type"
-      >
-        {heading}
-      </h2>
+      <div className="relative group inline-block">
+        <h2
+          id={id}
+          ref={headingRef}
+          className={`font-display text-fluid-h2 font-bold text-text-primary display-type ${fallbackRevealClass}`}
+          style={{
+            // For the glow effect:
+            '--glow-opacity': 0,
+            position: 'relative',
+          } as React.CSSProperties}
+        >
+          {/* Glow Overlay */}
+          {motionPreference === 'full' && (
+            <div 
+              className="pointer-events-none absolute z-10 transition-opacity duration-300"
+              style={{
+                top: '-120px', left: '-120px', right: '-120px', bottom: '-120px',
+                opacity: 'var(--glow-opacity)',
+                background: 'radial-gradient(circle 80px at calc(var(--mouse-x, 50%) + 120px) calc(var(--mouse-y, 50%) + 120px), rgba(255,255,255,0.15) 0%, transparent 100%)',
+                mixBlendMode: 'color-dodge',
+              }}
+              aria-hidden="true"
+            />
+          )}
+          <span className="relative z-20">{heading}</span>
+        </h2>
+      </div>
 
       {/* Optional subheading — body copy beneath the heading */}
       {subheading && (

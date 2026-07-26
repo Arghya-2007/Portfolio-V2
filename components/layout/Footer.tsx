@@ -113,7 +113,7 @@ export default function Footer() {
             </p>
             <p className="font-body text-xs text-text-muted">
               &copy; {year}{' '}
-              <span className="text-text-secondary">{profile.name}</span>.
+              <span className="text-text-secondary transition-all duration-300 hover:text-transparent hover:bg-clip-text hover:[background-image:var(--text-gradient)] cursor-default">{profile.name}</span>.
               All rights reserved.
             </p>
           </div>
