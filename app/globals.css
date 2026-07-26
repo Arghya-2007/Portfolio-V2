@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Design System CSS Variables — sourced from Design.md §2 & §3
+   All color/gradient/typography values live here once and are consumed
+   by Tailwind theme tokens in tailwind.config.ts.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* --- Surface & Background -------------------------------------------- */
+    --bg-primary:    #05050A;
+    --bg-secondary:  #0B0B14;
+
+    /* --- Glass Surfaces --------------------------------------------------- */
+    --glass-surface:    rgba(255, 255, 255, 0.06);
+    --glass-border:     rgba(255, 255, 255, 0.14);
+    --glass-highlight:  rgba(255, 255, 255, 0.25);
+
+    /* Liquid glass (Navbar + Buttons ONLY) */
+    --liquid-bg:        rgba(255, 255, 255, 0.08);
+    --liquid-border:    rgba(255, 255, 255, 0.18);
+    --liquid-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.25),
+      0 8px 32px rgba(0, 0, 0, 0.35);
+
+    /* Frosted panel (cards, general surfaces) */
+    --frosted-bg:       rgba(255, 255, 255, 0.05);
+    --frosted-border:   rgba(255, 255, 255, 0.10);
+
+    /* --- Primary Palette (Violet) ---------------------------------------- */
+    --primary-500:  #7C3AED;
+    --primary-700:  #5B21B6;
+    --primary-900:  #3B0764;
+
+    /* --- Secondary Palette (Amber/Coral) ---------------------------------- */
+    --secondary-400: #FF8A65;
+    --secondary-500: #FF6B4A;
+    --secondary-600: #E5502F;
+
+    /* --- Accent Palette (Cyan/Ice) ---------------------------------------- */
+    --accent-400:  #67D8F9;
+    --accent-500:  #38BDF8;
+
+    /* --- Text ------------------------------------------------------------- */
+    --text-primary:    #F5F5F7;
+    --text-secondary:  #A1A1AA;
+    --text-muted:      #6B6B76;
+
+    /* --- Gradients (reusable) --------------------------------------------- */
+    --hero-gradient:         linear-gradient(135deg, #7C3AED 0%, #3B0764 50%, #05050A 100%);
+    --warm-accent-gradient:  linear-gradient(90deg, #FF6B4A 0%, #7C3AED 100%);
+    --cool-accent-gradient:  linear-gradient(90deg, #38BDF8 0%, #7C3AED 100%);
+    --text-gradient:         linear-gradient(90deg, #38BDF8, #7C3AED, #FF6B4A);
+
+    /* Section overlay (always applied over background images) */
+    --section-overlay: linear-gradient(to bottom, rgba(5, 5, 10, 0.75), rgba(5, 5, 10, 0.92));
+
+    /* --- Fluid Type Scale (Design.md §3) ---------------------------------- */
+    --fs-h1:    clamp(2.5rem, 6vw, 6rem);
+    --fs-h2:    clamp(2rem, 4vw, 3.5rem);
+    --fs-body:  clamp(1rem, 1.2vw, 1.125rem);
+
+    /* --- Spacing ---------------------------------------------------------- */
+    --section-py: clamp(4rem, 10vw, 8rem);
+  }
+
+  /* -------------------------------------------------------------------------
+     Base Reset & Body
+  -------------------------------------------------------------------------- */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    /* Lenis handles smooth scrolling; native smooth conflicts with it. */
+    scroll-behavior: auto;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+  }
+
+  /* Focus visible — global ring style; components can override color */
+  :focus-visible {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 3px;
+  }
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+@layer utilities {
+
+  /* --- Text Gradient (headline highlight — use sparingly, Hero only) ------ */
+  .text-gradient {
+    background: var(--text-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    /* Prevent clipping on descenders */
+    padding-bottom: 0.05em;
+  }
+
+  /* --- Display Type — apply to H1 / H2 heading elements ------------------ */
+  .display-type {
+    font-family: var(--font-display), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  /* --- Fluid sizes — companion to Tailwind classes ----------------------- */
+  .text-fluid-h1 { font-size: var(--fs-h1); }
+  .text-fluid-h2 { font-size: var(--fs-h2); }
+  .text-fluid-body { font-size: var(--fs-body); }
+
+  /* --- Section Padding ---------------------------------------------------- */
+  .section-py {
+    padding-top: var(--section-py);
+    padding-bottom: var(--section-py);
+  }
+
+  /* --- Liquid Glass (Navbar + Buttons ONLY) ------------------------------- */
+  /*
+    @supports fallback: browsers without backdrop-filter get a solid
+    semi-transparent bg (Rules.md §6.2).
+  */
+  .glass-liquid {
+    background: var(--bg-secondary);          /* fallback */
+    border: 1px solid var(--liquid-border);
+    border-radius: 999px;
+    box-shadow: var(--liquid-shadow);
+  }
+
+  @supports (backdrop-filter: blur(1px)) {
+    .glass-liquid {
+      background: var(--liquid-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+  }
+
+  /* --- Frosted Panel (Cards, general glass surfaces) --------------------- */
+  /*
+    Lighter blur(12px), no liquid shimmer — keeps liquid-glass elements
+    as the visual signature (Design.md §4 constraint).
+  */
+  .glass-frosted {
+    background: rgba(5, 5, 10, 0.6);         /* fallback */
+    border: 1px solid var(--frosted-border);
+    border-radius: 20px;
+  }
+
+  @supports (backdrop-filter: blur(1px)) {
+    .glass-frosted {
+      background: var(--frosted-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  }
+
+  /* --- Section Background Image + Overlay -------------------------------- */
+  /*
+    Each section wraps content in a relative container; the
+    next/image fills the absolute inset, then this overlay sits on top.
+  */
+  .section-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--section-overlay);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .section-content-layer {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* --- Timeline accent dots ---------------------------------------------- */
+  .timeline-dot {
+    position: absolute;
+    left: -0.75rem;
+    top: 0.375rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    background: var(--bg-primary);
+  }
+
+  /* --- Reduced Motion / Fallback Reveal ---------------------------------- */
+  .reveal-hidden {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  
+  .reveal-visible {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  /* --- Parallax Background ----------------------------------------------- */
+  [data-parallax-bg] {
+    will-change: transform;
+    height: 135% !important;
+  }
+}

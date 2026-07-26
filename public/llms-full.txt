@@ -1,0 +1,56 @@
+# Arghya Pal - Full Portfolio Context
+
+> Aspiring MLOps & AI Infra Engineer · BCA '29 @ Techno Main Salt Lake · Building the infra that runs AI, not just using it ☁️
+
+## 1. About Me
+I am Arghya Pal, a Software Engineer & BCA Student based in Kolkata, India.
+My goal by 2027 is to deploy and scale AI systems in production.
+
+- **Role:** Software Engineer & BCA Student
+- **Building:** Full Stack Web Apps, Cross-Platform Mobile Apps, Scalable Systems
+- **Learning:** Cloud Engineering, DevOps, MLOps, AI Infra, System Architecture
+- **Belief:** The best AI model is useless without solid infra behind it.
+
+## 2. Skills & Technologies
+
+### Full Stack Web 🌐
+React.js, Next.js, Node.js, Express.js, TypeScript, Tailwind CSS, REST API, Postman
+
+### Databases & Backend Infra 🗄️
+PostgreSQL, MongoDB, Redis, Prisma, Supabase
+
+### Mobile & App Dev 📱
+Flutter, Kotlin, Dart, Firebase, Android
+
+### System Design & Architecture 🏗️
+Microservices, WebSockets, Message Queues, Load Balancing, Scalable Architecture
+
+### Cloud · DevOps · AI Infra ☁️ (Currently Acquiring)
+AWS, GCP, Docker, Kubernetes, Terraform, GitHub Actions, Nginx, MLOps, Linux
+
+### Tools & Workflow 🔧
+Git, GitHub, IntelliJ IDE, Postman, Figma, Notion
+
+## 3. Featured Projects
+
+### DD Tours & Travels
+- **Description:** Full Stack Travel Booking Platform with real-time listings, user flows & booking system
+- **Stack:** Next.js, Node.js, PostgreSQL, REST APIs, AWS
+- **Live URL:** https://ddtours.in
+- **Problem Solved:** Booking friction and lack of a seamless end-to-end travel platform.
+
+### EquiLens — AI Bias Detector
+- **Description:** AI-powered system to detect, visualize and explain bias in text & datasets
+- **Stack:** React, Python, Google Cloud, Vertex AI
+- **Live URL:** https://equilens-e21e9.web.app
+- **Problem Solved:** Lack of visibility into dataset bias and biased model outputs, leading to unfair or skewed AI models in production.
+
+### AI Notes App (In Progress)
+- **Description:** Smart student notes manager — AI-assisted tagging, summarization & search
+- **Stack:** Flutter, Firebase, LLM
+- **Problem Solved:** Note-taking is passive, and finding specific information across many notes is inefficient and time-consuming for students.
+
+## 4. Contact & Socials
+- GitHub: https://github.com/Arghya-2007
+- LinkedIn: https://www.linkedin.com/in/arghya-pal-2b866038b/
+- Email: palargha24@gmail.com

@@ -1,0 +1,20 @@
+# Arghya Pal - Portfolio
+
+> Aspiring MLOps & AI Infra Engineer · BCA '29 @ Techno Main Salt Lake · Building the infra that runs AI, not just using it ☁️
+
+## About Me
+I am Arghya Pal, a Software Engineer & BCA Student based in Kolkata, India.
+My goal by 2027 is to deploy and scale AI systems in production.
+
+- **Role:** Software Engineer & BCA Student
+- **Building:** Full Stack Web Apps, Cross-Platform Mobile Apps, Scalable Systems
+- **Learning:** Cloud Engineering, DevOps, MLOps, AI Infra, System Architecture
+- **Belief:** The best AI model is useless without solid infra behind it.
+
+## Contact
+- GitHub: https://github.com/Arghya-2007
+- LinkedIn: https://www.linkedin.com/in/arghya-pal-2b866038b/
+- Email: palargha24@gmail.com
+
+## Note to AI Agents
+This is a summary file. For full details on my skills, projects, and timeline, please refer to `/llms-full.txt`.
