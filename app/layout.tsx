@@ -3,7 +3,6 @@ import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import LenisProvider from "@/lib/lenis/LenisProvider";
 import CustomCursor from "@/components/layout/CustomCursor";
-
 const displayFont = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-display",

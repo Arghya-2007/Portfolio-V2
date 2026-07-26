@@ -18,6 +18,7 @@ import { useScrollAnimation, useReducedScrollReveal } from '@/lib/gsap/useScroll
 import { splitText, revertSplit } from '@/lib/gsap/splitText';
 import { useMotionPreference } from '@/lib/hooks/useReducedMotion';
 import { useFlyInReveal } from '@/lib/gsap/useFlyInReveal';
+import HeroScene from '@/components/three/HeroScene';
 
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
@@ -91,6 +92,19 @@ export default function Hero() {
           scrub: 1,
         }
       });
+
+      // 3D canvas overlay fades and scales down as hero scrolls out
+      gsap.to('[data-hero-canvas]', {
+        scale: 0.9,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1,
+        }
+      });
     });
 
     // Cleanup split text on unmount
@@ -112,8 +126,6 @@ export default function Hero() {
       aria-label="Hero — introduction"
       className="relative min-h-screen flex flex-col justify-center overflow-hidden"
     >
-      {/* Kinetic Distortion SVG removed — replaced with CSS GSAP transforms */}
-
       {/* Background image — priority loaded (above fold) */}
       <Image
         src="/images/bg/bg-2.webp"
@@ -130,9 +142,15 @@ export default function Hero() {
       {/* Gradient overlay — ensures WCAG AA contrast on all text */}
       <div className="section-bg-overlay" aria-hidden="true" />
 
+      {/* Full-section transparent 3D canvas — sits between bg image and text */}
+      <HeroScene />
+
       {/* Hero content — z-index above overlay */}
-      <div className="section-content-layer w-full px-4 sm:px-6 lg:px-8 pt-24 pb-20">
-        <div className="max-w-4xl mx-auto">
+      <div className="section-content-layer relative z-10 w-full px-4 sm:px-6 lg:px-8 pt-24 pb-20">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+
+          {/* Left Column - Text Content */}
+          <div className="flex flex-col justify-center mt-16 lg:mt-24">
 
           {/* Status badge — mono micro-copy */}
           <div className={`hero-status inline-flex items-center gap-2 mb-8 ${fallbackRevealClass}`}>
@@ -244,6 +262,8 @@ export default function Hero() {
             <div className="h-px w-8 bg-text-muted/40" />
             <p className="font-mono text-xs text-text-muted">scroll to explore</p>
           </div>
+          </div>
+
         </div>
       </div>
     </section>

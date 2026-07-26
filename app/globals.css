@@ -11,29 +11,29 @@
 @layer base {
   :root {
     /* --- Surface & Background -------------------------------------------- */
-    --bg-primary:    #05050A;
-    --bg-secondary:  #0B0B14;
+    --bg-primary: #05050A;
+    --bg-secondary: #0B0B14;
 
     /* --- Glass Surfaces --------------------------------------------------- */
-    --glass-surface:    rgba(255, 255, 255, 0.06);
-    --glass-border:     rgba(255, 255, 255, 0.14);
-    --glass-highlight:  rgba(255, 255, 255, 0.25);
+    --glass-surface: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --glass-highlight: rgba(255, 255, 255, 0.25);
 
     /* Liquid glass (Navbar + Buttons ONLY) */
-    --liquid-bg:        rgba(255, 255, 255, 0.08);
-    --liquid-border:    rgba(255, 255, 255, 0.18);
+    --liquid-bg: rgba(255, 255, 255, 0.08);
+    --liquid-border: rgba(255, 255, 255, 0.18);
     --liquid-shadow:
       inset 0 1px 1px rgba(255, 255, 255, 0.25),
       0 8px 32px rgba(0, 0, 0, 0.35);
 
     /* Frosted panel (cards, general surfaces) */
-    --frosted-bg:       rgba(255, 255, 255, 0.05);
-    --frosted-border:   rgba(255, 255, 255, 0.10);
+    --frosted-bg: rgba(255, 255, 255, 0.05);
+    --frosted-border: rgba(255, 255, 255, 0.10);
 
     /* --- Primary Palette (Violet) ---------------------------------------- */
-    --primary-500:  #7C3AED;
-    --primary-700:  #5B21B6;
-    --primary-900:  #3B0764;
+    --primary-500: #7C3AED;
+    --primary-700: #5B21B6;
+    --primary-900: #3B0764;
 
     /* --- Secondary Palette (Amber/Coral) ---------------------------------- */
     --secondary-400: #FF8A65;
@@ -41,30 +41,33 @@
     --secondary-600: #E5502F;
 
     /* --- Accent Palette (Cyan/Ice) ---------------------------------------- */
-    --accent-400:  #67D8F9;
-    --accent-500:  #38BDF8;
+    --accent-400: #67D8F9;
+    --accent-500: #38BDF8;
 
     /* --- Text ------------------------------------------------------------- */
-    --text-primary:    #F5F5F7;
-    --text-secondary:  #A1A1AA;
-    --text-muted:      #6B6B76;
+    --text-primary: #F5F5F7;
+    --text-secondary: #A1A1AA;
+    --text-muted: #6B6B76;
 
     /* --- Gradients (reusable) --------------------------------------------- */
-    --hero-gradient:         linear-gradient(135deg, #7C3AED 0%, #3B0764 50%, #05050A 100%);
-    --warm-accent-gradient:  linear-gradient(90deg, #FF6B4A 0%, #7C3AED 100%);
-    --cool-accent-gradient:  linear-gradient(90deg, #38BDF8 0%, #7C3AED 100%);
-    --text-gradient:         linear-gradient(90deg, #38BDF8, #7C3AED, #FF6B4A);
+    --hero-gradient: linear-gradient(135deg, #7C3AED 0%, #3B0764 50%, #05050A 100%);
+    --warm-accent-gradient: linear-gradient(90deg, #FF6B4A 0%, #7C3AED 100%);
+    --cool-accent-gradient: linear-gradient(90deg, #38BDF8 0%, #7C3AED 100%);
+    --text-gradient: linear-gradient(90deg, #38BDF8, #7C3AED, #FF6B4A);
 
     /* Section overlay (always applied over background images) */
     --section-overlay: linear-gradient(to bottom, rgba(5, 5, 10, 0.75), rgba(5, 5, 10, 0.92));
 
     /* --- Fluid Type Scale (Design.md §3) ---------------------------------- */
-    --fs-h1:    clamp(2.5rem, 6vw, 6rem);
-    --fs-h2:    clamp(2rem, 4vw, 3.5rem);
-    --fs-body:  clamp(1rem, 1.2vw, 1.125rem);
+    --fs-h1: clamp(2.5rem, 6vw, 6rem);
+    --fs-h2: clamp(2rem, 4vw, 3.5rem);
+    --fs-body: clamp(1rem, 1.2vw, 1.125rem);
 
     /* --- Spacing ---------------------------------------------------------- */
     --section-py: clamp(4rem, 10vw, 8rem);
+
+    width: 100%;
+    height: 100vh;
   }
 
   /* -------------------------------------------------------------------------
@@ -79,6 +82,8 @@
   html {
     /* Lenis handles smooth scrolling; native smooth conflicts with it. */
     scroll-behavior: auto;
+    width: 100%;
+    height: 100vh;
   }
 
   body {
@@ -94,6 +99,8 @@
     /* Disable text selection across the site */
     -webkit-user-select: none;
     user-select: none;
+    width: 100%;
+    height: 100vh;
   }
 
   /* Focus visible — global ring style; components can override color */
@@ -142,9 +149,17 @@
   }
 
   /* --- Fluid sizes — companion to Tailwind classes ----------------------- */
-  .text-fluid-h1 { font-size: var(--fs-h1); }
-  .text-fluid-h2 { font-size: var(--fs-h2); }
-  .text-fluid-body { font-size: var(--fs-body); }
+  .text-fluid-h1 {
+    font-size: var(--fs-h1);
+  }
+
+  .text-fluid-h2 {
+    font-size: var(--fs-h2);
+  }
+
+  .text-fluid-body {
+    font-size: var(--fs-body);
+  }
 
   /* --- Section Padding ---------------------------------------------------- */
   .section-py {
@@ -158,7 +173,8 @@
     semi-transparent bg (Rules.md §6.2).
   */
   .glass-liquid {
-    background: var(--bg-secondary);          /* fallback */
+    background: var(--bg-secondary);
+    /* fallback */
     border: 1px solid var(--liquid-border);
     border-radius: 999px;
     box-shadow: var(--liquid-shadow);
@@ -178,7 +194,8 @@
     as the visual signature (Design.md §4 constraint).
   */
   .glass-frosted {
-    background: rgba(5, 5, 10, 0.6);         /* fallback */
+    background: rgba(5, 5, 10, 0.6);
+    /* fallback */
     border: 1px solid var(--frosted-border);
     border-radius: 20px;
   }
@@ -206,7 +223,7 @@
 
   .section-content-layer {
     position: relative;
-    z-index: 2;
+    z-index: 10;
   }
 
   /* --- Timeline accent dots ---------------------------------------------- */
@@ -226,7 +243,7 @@
     opacity: 0;
     transform: translateY(16px);
   }
-  
+
   .reveal-visible {
     opacity: 1;
     transform: none;

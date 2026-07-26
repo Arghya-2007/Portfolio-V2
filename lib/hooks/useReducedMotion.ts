@@ -23,8 +23,18 @@ export function useMotionPreference(): MotionPreference {
       const isLowTier =
         (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) ||
         (extNav.deviceMemory && extNav.deviceMemory < 4);
+
+      let hasWebGL = true;
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) hasWebGL = false;
+      } catch {
+        hasWebGL = false;
+      }
+
       
-      if (isLowTier) {
+      if (isLowTier || !hasWebGL) {
         setPreference('reduced');
         return;
       }
