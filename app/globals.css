@@ -91,6 +91,9 @@
     -moz-osx-font-smoothing: grayscale;
     /* Prevent horizontal scroll on mobile */
     overflow-x: hidden;
+    /* Disable text selection across the site */
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   /* Focus visible — global ring style; components can override color */
