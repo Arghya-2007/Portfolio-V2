@@ -107,7 +107,8 @@
 @layer utilities {
 
   /* --- Text Gradient (headline highlight — use sparingly, Hero only) ------ */
-  .text-gradient {
+  .text-gradient,
+  .text-gradient .word-split {
     background: var(--text-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
