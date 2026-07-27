@@ -92,15 +92,32 @@ export default function GlassButton(props: GlassButtonProps) {
   } = props;
 
   const sheenRef = useRef<HTMLSpanElement>(null);
+  const buttonRef = useRef<HTMLElement>(null);
   const motionPreference = useMotionPreference();
 
   const handleMouseEnter = () => {
-    if (motionPreference !== 'full' || !sheenRef.current) return;
-    gsap.fromTo(
-      sheenRef.current,
-      { xPercent: -100 },
-      { xPercent: 100, duration: 0.6, ease: 'power2.inOut', overwrite: 'auto' }
-    );
+    // Only apply hover effects on fine pointer devices
+    const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (motionPreference !== 'full' || !isFinePointer) return;
+    
+    if (sheenRef.current) {
+      gsap.fromTo(
+        sheenRef.current,
+        { xPercent: -100 },
+        { xPercent: 100, duration: 0.6, ease: 'power2.inOut', overwrite: 'auto' }
+      );
+    }
+    
+    if (buttonRef.current) {
+      // Bounce micro-interaction
+      gsap.fromTo(
+        buttonRef.current,
+        { scale: 1, y: 0 },
+        { scale: 0.95, y: -4, duration: 0.4, ease: 'elastic.out(1, 0.4)', overwrite: 'auto', onComplete: () => {
+          gsap.to(buttonRef.current, { scale: 1, y: 0, duration: 0.4, ease: 'elastic.out(1, 0.4)' });
+        }}
+      );
+    }
   };
 
   const classes = [
@@ -129,6 +146,7 @@ export default function GlassButton(props: GlassButtonProps) {
     const anchorProps = rest as Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>;
     return (
       <a 
+        ref={buttonRef as React.RefObject<HTMLAnchorElement>}
         href={href} 
         className={classes} 
         onMouseEnter={handleMouseEnter}
@@ -143,6 +161,7 @@ export default function GlassButton(props: GlassButtonProps) {
   const buttonProps = rest as ButtonHTMLAttributes<HTMLButtonElement>;
   return (
     <button 
+      ref={buttonRef as React.RefObject<HTMLButtonElement>}
       type="button" 
       className={classes} 
       onMouseEnter={handleMouseEnter}

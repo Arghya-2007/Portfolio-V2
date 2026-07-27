@@ -19,7 +19,7 @@ export interface SocialLink {
 // ---------------------------------------------------------------------------
 
 export interface WhoAmI {
-  role: string;
+  role: string[];
   building: string[];
   learning: string[];
   goalBy2027: string;

@@ -30,7 +30,11 @@ export const profile: Profile = {
   // "Who Am I" block — from ProfileContent.md §2 (his own README, verbatim)
   // ---------------------------------------------------------------------------
   whoAmI: {
-    role: 'Software Engineer & BCA Student',
+    role: [
+      'Software Engineer & BCA Student',
+      'Building Scalable Systems',
+      'Aspiring MLOps & AI Infra Engineer',
+    ],
     building: [
       'Full Stack Web Apps',
       'Cross-Platform Mobile Apps',

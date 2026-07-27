@@ -3,6 +3,9 @@ import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import LenisProvider from "@/lib/lenis/LenisProvider";
 import CustomCursor from "@/components/layout/CustomCursor";
+import SiteEntryLoader from "@/components/layout/SiteEntryLoader";
+import BackgroundParticles from "@/components/layout/BackgroundParticles";
+
 const displayFont = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-display",
@@ -52,6 +55,8 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <SiteEntryLoader />
+        <BackgroundParticles />
         <LenisProvider>
           <CustomCursor />
           {children}

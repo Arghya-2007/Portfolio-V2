@@ -52,15 +52,21 @@ interface HeroSceneProps {
 export default function HeroScene({ onModelLoaded }: HeroSceneProps) {
   const [mounted, setMounted] = useState(false);
   const [hasWebGL, setHasWebGL] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const motionPreference = useMotionPreference();
 
   useEffect(() => {
     setMounted(true);
     setHasWebGL(checkWebGLSupport());
+    const mobileQuery = window.matchMedia('(max-width: 767px) and (pointer: coarse)');
+    setIsMobile(mobileQuery.matches);
+    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mobileQuery.addEventListener('change', listener);
+    return () => mobileQuery.removeEventListener('change', listener);
   }, []);
 
-  // Reduced motion / no WebGL / not mounted on client yet → render nothing
-  if (!mounted || !hasWebGL || motionPreference !== 'full') {
+  // Reduced motion / no WebGL / mobile phone / not mounted on client yet → render nothing
+  if (!mounted || !hasWebGL || motionPreference !== 'full' || isMobile) {
     return null;
   }
 

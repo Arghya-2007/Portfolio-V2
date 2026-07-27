@@ -19,15 +19,6 @@ export function useMotionPreference(): MotionPreference {
         return;
       }
 
-      // Explicit mobile gate: < 768px wide AND a coarse pointer (touch)
-      // This routes mobile phones to the static fallback, saving battery/bandwidth
-      // while preserving 3D for capable tablets/desktops.
-      const isMobile = window.matchMedia('(max-width: 767px) and (pointer: coarse)').matches;
-      if (isMobile) {
-        setPreference('reduced');
-        return;
-      }
-
       const extNav = navigator as ExtendedNavigator;
       const isLowTier =
         (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) ||

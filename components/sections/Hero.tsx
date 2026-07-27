@@ -14,10 +14,11 @@ import { gsap } from 'gsap';
 import { profile } from '@/data/profile';
 import GlassButton from '@/components/ui/GlassButton';
 import MagneticWrapper from '@/components/ui/MagneticWrapper';
+import RotatingText from '@/components/ui/RotatingText';
 import { useScrollAnimation, useReducedScrollReveal } from '@/lib/gsap/useScrollAnimation';
 import { splitText, revertSplit } from '@/lib/gsap/splitText';
 import { useMotionPreference } from '@/lib/hooks/useReducedMotion';
-import { useFlyInReveal } from '@/lib/gsap/useFlyInReveal';
+import { useHeadlineHoverEffects } from '@/lib/gsap/useHeadlineHoverEffects';
 import HeroScene from '@/components/three/HeroScene';
 import HeroLoadingScreen from '@/components/three/HeroLoadingScreen';
 
@@ -29,8 +30,9 @@ export default function Hero() {
   const motionPreference = useMotionPreference();
   const [isModelReady, setIsModelReady] = useState(false);
   const [hasWebGL, setHasWebGL] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Check WebGL in useEffect
+  // Check WebGL and Mobile on mount
   useEffect(() => {
     // Simple canvas check
     try {
@@ -40,10 +42,19 @@ export default function Hero() {
     } catch {
       setHasWebGL(false);
     }
+    
+    // Explicit mobile gate for Hero 3D (saves bandwidth/battery on phones)
+    const mobileQuery = window.matchMedia('(max-width: 767px) and (pointer: coarse)');
+    setIsMobile(mobileQuery.matches);
+    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mobileQuery.addEventListener('change', listener);
+    return () => mobileQuery.removeEventListener('change', listener);
   }, []);
 
-  // Kinetic Text Effect for H1
-  useFlyInReveal(h1Ref, isModelReady);
+  const isHero3DMode = motionPreference === 'full' && hasWebGL && !isMobile;
+
+  // Headline Hover Effects (Gradient Shift + Explode)
+  useHeadlineHoverEffects(h1Ref, isModelReady);
 
   // 1. Handle GSAP Parallax and Scroll Exits (runs once, completely decoupled from loading state)
   useScrollAnimation(containerRef, (ctx, el) => {
@@ -79,21 +90,66 @@ export default function Hero() {
   // 2. Entrance Timelines (runs once, pauses until model ready)
   useEffect(() => {
     const el = containerRef.current;
-    if (!el || motionPreference !== 'full') return;
+    if (!el || !isHero3DMode) return;
 
     const ctx = gsap.context(() => {
       const tagline = taglineRef.current;
-      if (!tagline) return;
+      const h1El = h1Ref.current;
+      const statusLine = el.querySelector('.hero-status p');
+      
+      if (!tagline || !h1El || !statusLine) return;
 
-      const taglineSplit = splitText(tagline, { type: 'character' });
+      const h1Split = splitText(h1El, { type: 'character' });
+      const statusSplit = splitText(statusLine as HTMLElement, { type: 'character' });
+      
+      // We will append a cursor element for typewriter
+      const cursor = document.createElement('span');
+      cursor.textContent = '|';
+      cursor.style.display = 'inline-block';
+      cursor.style.opacity = '1';
+      cursor.style.marginLeft = '2px';
+      cursor.style.animation = 'blink 1s step-end infinite';
+      statusLine.appendChild(cursor);
+
+      // Create a style element for the blink animation if it doesn't exist
+      if (!document.getElementById('typewriter-blink')) {
+        const style = document.createElement('style');
+        style.id = 'typewriter-blink';
+        style.innerHTML = `@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`;
+        document.head.appendChild(style);
+      }
+
+      // Add particles container
+      const particlesContainer = document.createElement('div');
+      particlesContainer.style.position = 'absolute';
+      particlesContainer.style.inset = '0';
+      particlesContainer.style.pointerEvents = 'none';
+      particlesContainer.style.zIndex = '10'; // Above text
+      h1El.appendChild(particlesContainer);
+
       const tl = gsap.timeline({ paused: true });
       tlRef.current = tl;
 
       // Set initial states explicitly to hide elements immediately on mount
-      gsap.set('.hero-status', { opacity: 0, y: 15 });
-      if (taglineSplit.chars.length > 0) {
-        gsap.set(taglineSplit.chars, { opacity: 0, y: 15, scale: 1.05, filter: 'blur(8px)' });
+      gsap.set('.hero-status', { opacity: 1 }); // We fade this container in, but its characters are hidden initially
+      if (statusSplit.chars.length > 0) {
+        gsap.set(statusSplit.chars, { opacity: 0 });
       }
+      
+      if (tagline) {
+        gsap.set(tagline, { opacity: 0, y: 15, scale: 1.05, filter: 'blur(8px)' });
+      }
+      
+      if (h1Split.chars.length > 0) {
+        gsap.set(h1Split.chars, { 
+          opacity: 0, 
+          y: () => gsap.utils.random(-40, 40), 
+          rotation: () => gsap.utils.random(-15, 15), 
+          filter: 'blur(10px)',
+          scale: () => gsap.utils.random(0.8, 1.2)
+        });
+      }
+      
       gsap.set('.hero-reveal-up', { opacity: 0, y: 20 });
       gsap.set('[data-hero-canvas-wrapper]', { opacity: 0, scale: 0.85 });
 
@@ -105,33 +161,103 @@ export default function Hero() {
         0
       );
 
-      tl.fromTo(
-        '.hero-status',
-        { opacity: 0, y: 15 },
-        { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
-        0.2
-      );
+      // 0.2: Typewriter Effect
+      if (statusSplit.chars.length > 0) {
+        tl.to(statusSplit.chars, {
+          opacity: 1,
+          duration: 0.01,
+          stagger: 0.04,
+          ease: 'none',
+        }, 0.2);
+        
+        tl.set(cursor, { display: 'none' }, ">"); // Hide cursor after stagger completes
+      }
 
-      if (taglineSplit.chars.length > 0) {
-        tl.fromTo(
-          taglineSplit.chars,
-          { opacity: 0, y: 15, scale: 1.05, filter: 'blur(8px)' },
+      // 0.6: Crazy Text Reveal for H1
+      if (h1Split.chars.length > 0) {
+        tl.to(
+          h1Split.chars,
+          {
+            opacity: 1,
+            y: 0,
+            rotation: 0,
+            filter: 'blur(0px)',
+            scale: 1,
+            duration: 0.8,
+            ease: 'expo.out',
+            stagger: { amount: 0.4, from: "random" } // slight randomized stagger
+          },
+          0.6
+        );
+
+        // Particle Burst during H1 reveal
+        // Spawn 2 particles per character
+        const particles: HTMLElement[] = [];
+        const colors = ['#67D8F9', '#FF8A65'];
+        h1Split.chars.forEach((char) => {
+           for (let i = 0; i < 2; i++) {
+             const p = document.createElement('div');
+             p.style.position = 'absolute';
+             p.style.width = '4px';
+             p.style.height = '4px';
+             p.style.borderRadius = '50%';
+             p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+             
+             // Initial position relative to character
+             const charRect = char.getBoundingClientRect();
+             const h1Rect = h1El.getBoundingClientRect();
+             
+             const charCenterX = charRect.left - h1Rect.left + charRect.width / 2;
+             const charCenterY = charRect.top - h1Rect.top + charRect.height / 2;
+             
+             p.style.left = `${charCenterX}px`;
+             p.style.top = `${charCenterY}px`;
+             p.style.opacity = '0';
+             
+             particlesContainer.appendChild(p);
+             particles.push(p);
+           }
+        });
+        
+        // Animate particles outward
+        tl.fromTo(particles, {
+          opacity: 1,
+          scale: 1,
+          x: 0,
+          y: 0
+        }, {
+          opacity: 0,
+          scale: 0,
+          x: () => gsap.utils.random(-60, 60),
+          y: () => gsap.utils.random(-60, 60),
+          duration: () => gsap.utils.random(0.4, 0.8),
+          ease: 'power2.out',
+          stagger: { amount: 0.4, from: "random" },
+          onComplete: () => {
+             if (particlesContainer.parentNode) particlesContainer.remove(); // Cleanup
+          }
+        }, 0.6);
+      }
+
+      // 1.2: Tagline
+      if (tagline) {
+        tl.to(
+          tagline,
           {
             opacity: 1,
             y: 0,
             scale: 1,
             filter: 'blur(0px)',
             duration: 0.8,
-            ease: 'power3.out',
-            stagger: 0.015
+            ease: 'power3.out'
           },
-          '0.8'
+          1.2
         );
       }
 
-      tl.fromTo(
+      // 1.2: CTAs rise in
+      tl.to(
         '.hero-reveal-up',
-        { opacity: 0, y: 20 },
         {
           opacity: 1,
           y: 0,
@@ -139,16 +265,20 @@ export default function Hero() {
           ease: 'power3.out',
           stagger: 0.1
         },
-        '-=0.4'
+        1.2
       );
 
       return () => {
-        revertSplit(tagline);
+        // revertSplit(tagline); // Removed because we don't split it anymore
+        revertSplit(h1El);
+        revertSplit(statusLine as HTMLElement);
+        if (cursor.parentNode) cursor.remove();
+        if (particlesContainer.parentNode) particlesContainer.remove();
       };
     }, el);
 
     return () => ctx.revert();
-  }, [motionPreference]);
+  }, [isHero3DMode]);
 
   // Play timeline when model is ready
   useEffect(() => {
@@ -157,11 +287,11 @@ export default function Hero() {
     }
   }, [isModelReady]);
 
-  // Fallback for reduced motion
+  // Fallback for reduced motion or mobile view
   useReducedScrollReveal(containerRef);
 
   // Helper class for fallback reveal logic
-  const fallbackRevealClass = motionPreference !== 'full' ? 'reveal-hidden' : '';
+  const fallbackRevealClass = !isHero3DMode ? 'reveal-hidden' : '';
 
   return (
     <section
@@ -187,7 +317,7 @@ export default function Hero() {
       <div className="section-bg-overlay" aria-hidden="true" />
 
       {/* Loading Screen Overlay */}
-      {motionPreference === 'full' && hasWebGL && (
+      {isHero3DMode && (
         <HeroLoadingScreen isVisible={!isModelReady} />
       )}
 
@@ -245,7 +375,7 @@ export default function Hero() {
 
           {/* Role tagline */}
           <p ref={taglineRef} className={`font-body text-xl sm:text-2xl text-text-secondary mb-5 max-w-2xl leading-display ${fallbackRevealClass}`}>
-            {profile.whoAmI.role}
+            <RotatingText roles={profile.whoAmI.role} />
           </p>
 
           {/* Full tagline / one-liner */}
