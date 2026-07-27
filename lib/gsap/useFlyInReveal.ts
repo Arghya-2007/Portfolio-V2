@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, RefObject } from 'react';
+import { useEffect, useRef, RefObject } from 'react';
 import { gsap } from 'gsap';
 import { splitText, revertSplit } from './splitText';
 import { useMotionPreference } from '../hooks/useReducedMotion';
 
 export function useFlyInReveal(
-  containerRef: RefObject<HTMLElement>
+  containerRef: RefObject<HTMLElement>,
+  isModelReady: boolean = true
 ) {
   const motionPreference = useMotionPreference();
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -20,6 +22,9 @@ export function useFlyInReveal(
     // We do NOT want GSAP to automatically revert our manually managed event listeners 
     // in a way that breaks on re-renders, but `gsap.context` is good for animations.
     const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ paused: true });
+      tlRef.current = tl;
+
       if (motionPreference === 'full') {
         // 1. Setup split text for character-level fly-in
         split = splitText(el, { type: 'character' });
@@ -44,7 +49,7 @@ export function useFlyInReveal(
 
           // Fly-in Convergence
           split.chars.forEach((char) => {
-            gsap.to(char, {
+            tl.to(char, {
               opacity: 1,
               x: 0,
               y: 0,
@@ -53,12 +58,12 @@ export function useFlyInReveal(
               duration: gsap.utils.random(0.8, 1.4),
               delay: gsap.utils.random(0, 0.3),
               ease: 'expo.out',
-            });
+            }, 0); // all start relative to timeline start
           });
         }
       } else {
         // Reduced motion: standard fade
-        gsap.fromTo(
+        tl.fromTo(
           el,
           { opacity: 0 },
           { opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.2 }
@@ -198,4 +203,10 @@ export function useFlyInReveal(
       }
     };
   }, [containerRef, motionPreference]);
+
+  useEffect(() => {
+    if (isModelReady && tlRef.current) {
+      tlRef.current.play();
+    }
+  }, [isModelReady]);
 }

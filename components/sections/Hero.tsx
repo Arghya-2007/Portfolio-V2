@@ -8,7 +8,7 @@
 // H1: fluid clamp size, display-type letter-spacing, text-gradient on name.
 // CTAs: GlassButton (primary + secondary variants).
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { profile } from '@/data/profile';
@@ -19,66 +19,34 @@ import { splitText, revertSplit } from '@/lib/gsap/splitText';
 import { useMotionPreference } from '@/lib/hooks/useReducedMotion';
 import { useFlyInReveal } from '@/lib/gsap/useFlyInReveal';
 import HeroScene from '@/components/three/HeroScene';
+import HeroLoadingScreen from '@/components/three/HeroLoadingScreen';
 
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
   const h1Ref = useRef<HTMLHeadingElement>(null);
   const taglineRef = useRef<HTMLParagraphElement>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
   const motionPreference = useMotionPreference();
+  const [isModelReady, setIsModelReady] = useState(false);
+  const [hasWebGL, setHasWebGL] = useState(true);
+
+  // Check WebGL in useEffect
+  useEffect(() => {
+    // Simple canvas check
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+      setHasWebGL(!!gl);
+    } catch {
+      setHasWebGL(false);
+    }
+  }, []);
 
   // Kinetic Text Effect for H1
-  useFlyInReveal(h1Ref);
+  useFlyInReveal(h1Ref, isModelReady);
 
-  // Handle GSAP entrance animation and parallax
+  // 1. Handle GSAP Parallax and Scroll Exits (runs once, completely decoupled from loading state)
   useScrollAnimation(containerRef, (ctx, el) => {
-    const tagline = taglineRef.current;
-
-    if (!tagline) return;
-
-    // Split text into words/chars
-    const taglineSplit = splitText(tagline, { type: 'character' });
-
-    const tl = gsap.timeline();
-
-    // 1. Status badge fades in
-    tl.fromTo(
-      '.hero-status',
-      { opacity: 0, y: 15 },
-      { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', delay: 0.2 }
-    );
-
-    // 3. Tagline characters stagger
-    if (taglineSplit.chars.length > 0) {
-      tl.fromTo(
-        taglineSplit.chars,
-        { opacity: 0, y: 15, scale: 1.05, filter: 'blur(8px)' },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          ease: 'power3.out',
-          stagger: 0.015
-        },
-        '0.8' // Start slightly after fly-in begins
-      );
-    }
-
-    // 4. One-liner, blockquote, CTAs, and scroll indicator fade up together
-    tl.fromTo(
-      '.hero-reveal-up',
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        stagger: 0.1
-      },
-      '-=0.4'
-    );
-
     // Parallax background (desktop only)
     const mm = gsap.matchMedia();
     mm.add('(min-width: 768px)', () => {
@@ -106,12 +74,88 @@ export default function Hero() {
         }
       });
     });
+  }); // Empty deps, runs once
 
-    // Cleanup split text on unmount
-    return () => {
-      revertSplit(tagline);
-    };
-  });
+  // 2. Entrance Timelines (runs once, pauses until model ready)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || motionPreference !== 'full') return;
+
+    const ctx = gsap.context(() => {
+      const tagline = taglineRef.current;
+      if (!tagline) return;
+
+      const taglineSplit = splitText(tagline, { type: 'character' });
+      const tl = gsap.timeline({ paused: true });
+      tlRef.current = tl;
+
+      // Set initial states explicitly to hide elements immediately on mount
+      gsap.set('.hero-status', { opacity: 0, y: 15 });
+      if (taglineSplit.chars.length > 0) {
+        gsap.set(taglineSplit.chars, { opacity: 0, y: 15, scale: 1.05, filter: 'blur(8px)' });
+      }
+      gsap.set('.hero-reveal-up', { opacity: 0, y: 20 });
+      gsap.set('[data-hero-canvas-wrapper]', { opacity: 0, scale: 0.85 });
+
+      // Add entrance animations to the paused timeline
+      tl.fromTo(
+        '[data-hero-canvas-wrapper]',
+        { opacity: 0, scale: 0.85 },
+        { opacity: 1, scale: 1, duration: 1.2, ease: 'power3.out' },
+        0
+      );
+
+      tl.fromTo(
+        '.hero-status',
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
+        0.2
+      );
+
+      if (taglineSplit.chars.length > 0) {
+        tl.fromTo(
+          taglineSplit.chars,
+          { opacity: 0, y: 15, scale: 1.05, filter: 'blur(8px)' },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            filter: 'blur(0px)',
+            duration: 0.8,
+            ease: 'power3.out',
+            stagger: 0.015
+          },
+          '0.8'
+        );
+      }
+
+      tl.fromTo(
+        '.hero-reveal-up',
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+          stagger: 0.1
+        },
+        '-=0.4'
+      );
+
+      return () => {
+        revertSplit(tagline);
+      };
+    }, el);
+
+    return () => ctx.revert();
+  }, [motionPreference]);
+
+  // Play timeline when model is ready
+  useEffect(() => {
+    if (isModelReady && tlRef.current) {
+      tlRef.current.play();
+    }
+  }, [isModelReady]);
 
   // Fallback for reduced motion
   useReducedScrollReveal(containerRef);
@@ -142,8 +186,13 @@ export default function Hero() {
       {/* Gradient overlay — ensures WCAG AA contrast on all text */}
       <div className="section-bg-overlay" aria-hidden="true" />
 
+      {/* Loading Screen Overlay */}
+      {motionPreference === 'full' && hasWebGL && (
+        <HeroLoadingScreen isVisible={!isModelReady} />
+      )}
+
       {/* Full-section transparent 3D canvas — sits between bg image and text */}
-      <HeroScene />
+      <HeroScene onModelLoaded={() => setIsModelReady(true)} />
 
       {/* Hero content — z-index above overlay */}
       <div className="section-content-layer relative z-10 w-full px-4 sm:px-6 lg:px-8 pt-24 pb-20">
