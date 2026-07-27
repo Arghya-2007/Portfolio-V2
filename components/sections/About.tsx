@@ -62,7 +62,7 @@ function AmbientParticles() {
   return (
     <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
       {particles.map((_, i) => (
-        <div 
+        <div
           key={i}
           className="ambient-particle absolute w-1 h-1 rounded-full bg-accent-400 shadow-[0_0_12px_2px_rgba(45,212,191,0.6)]"
           style={{
@@ -80,7 +80,7 @@ export default function About() {
   const stats = buildStats(profile, githubStats);
   const containerRef = useRef<HTMLElement>(null);
   const motionPreference = useMotionPreference();
-  
+
   useScrollAnimation(containerRef, (ctx, el) => {
     if (motionPreference !== 'full') return;
 
@@ -137,7 +137,7 @@ export default function About() {
     >
       {/* Background image — cool tone */}
       <Image
-        src="/images/bg/bg-1.webp"
+        src="/images/bg/bg-4.webp"
         alt=""
         aria-hidden="true"
         fill
@@ -149,7 +149,7 @@ export default function About() {
 
       {/* Section overlay */}
       <div className="section-bg-overlay" aria-hidden="true" />
-      
+
       {/* Ambient background energy */}
       <AmbientParticles />
 
@@ -168,7 +168,7 @@ export default function About() {
 
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-stretch mt-8 lg:mt-12">
-            
+
             {/* Left Column: Bio + Quote */}
             <div className="lg:col-span-5 flex flex-col justify-between gap-12 relative z-10">
               <div className="space-y-6">
@@ -184,7 +184,7 @@ export default function About() {
                   My ultimate goal is to bridge the gap between AI models and reliable production infrastructure.
                 </p>
               </div>
-              
+
               <div className="mt-auto pb-4">
                 <BeliefQuote quote={profile.belief} />
               </div>
@@ -204,11 +204,11 @@ export default function About() {
             </p>
             <dl className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {stats.map((stat, i) => (
-                <StatCard 
-                  key={stat.label} 
-                  label={stat.label} 
-                  value={stat.value} 
-                  icon={stat.icon} 
+                <StatCard
+                  key={stat.label}
+                  label={stat.label}
+                  value={stat.value}
+                  icon={stat.icon}
                   delay={i * 0.1}
                 />
               ))}

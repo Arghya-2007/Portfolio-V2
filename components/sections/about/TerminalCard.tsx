@@ -90,15 +90,27 @@ export default function TerminalCard() {
     }).add(localTl);
 
     // Cleanup DOM modifications on revert
-    ctx.add(() => {
+    return () => {
       if (textRef.current) revertSplit(textRef.current);
-    });
+    };
   });
+
+  const handleMouseEnter = () => {
+    if (motionPreference !== 'full') return;
+    gsap.to(containerRef.current, { y: -4, scale: 1.02, boxShadow: '0 0 30px rgba(45, 212, 191, 0.25)', duration: 0.3, ease: 'power2.out' });
+  };
+
+  const handleMouseLeave = () => {
+    if (motionPreference !== 'full') return;
+    gsap.to(containerRef.current, { y: 0, scale: 1, boxShadow: '0 0 30px rgba(45, 212, 191, 0.15)', duration: 0.3, ease: 'power2.out' });
+  };
 
   return (
     <GlassCard 
       ref={containerRef}
       as="div" 
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={`relative flex flex-col h-full hover:shadow-glow-accent/10 transition-shadow duration-500 overflow-hidden group ${motionPreference !== 'full' ? '' : 'opacity-0 scale-95'}`}
     >
       {/* Subtle cyan inner glow/scanline effect */}

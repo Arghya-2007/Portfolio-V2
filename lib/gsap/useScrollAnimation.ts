@@ -2,6 +2,7 @@
 
 import { useEffect, RefObject } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { useMotionPreference } from '../hooks/useReducedMotion';
 import { registerGSAP } from './registerPlugins';
 
@@ -15,7 +16,7 @@ import { registerGSAP } from './registerPlugins';
  */
 export function useScrollAnimation(
   containerRef: RefObject<HTMLElement>,
-  animationFactory: (ctx: gsap.Context, el: HTMLElement) => void,
+  animationFactory: (ctx: gsap.Context, el: HTMLElement) => void | (() => void),
   deps: unknown[] = []
 ) {
   const motionPreference = useMotionPreference();
@@ -29,11 +30,19 @@ export function useScrollAnimation(
 
     // Create a GSAP context scoped to the container element
     const ctx = gsap.context((context) => {
-      animationFactory(context, el);
+      return animationFactory(context, el);
     }, el);
 
+    // Refresh ScrollTrigger after a tick to ensure layouts are computed
+    const timeoutId = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 50);
+
     // Cleanup on unmount or when dependencies change
-    return () => ctx.revert();
+    return () => {
+      clearTimeout(timeoutId);
+      ctx.revert();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [motionPreference, containerRef, ...deps]);
 }

@@ -82,7 +82,7 @@ export default function Projects() {
     >
       {/* Background image — cool tone */}
       <Image
-        src="/images/bg/bg-4.webp"
+        src="/images/bg/bg-1.webp"
         alt=""
         aria-hidden="true"
         fill
