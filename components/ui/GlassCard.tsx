@@ -12,31 +12,33 @@
 // @supports fallback (Rules.md §6.2): browsers without backdrop-filter
 // receive a solid rgba(5,5,10,0.7) background instead.
 
-import { type ElementType, type ReactNode, type HTMLAttributes } from 'react';
+import { forwardRef, type ElementType, type ReactNode, type HTMLAttributes } from 'react';
 
 type AllowedTag = 'div' | 'article' | 'li' | 'section' | 'aside';
 
-interface GlassCardProps extends HTMLAttributes<HTMLElement> {
+export interface GlassCardProps extends HTMLAttributes<HTMLElement> {
   children: ReactNode;
   /** Semantic element to render — defaults to 'div' */
   as?: AllowedTag;
   className?: string;
 }
 
-export default function GlassCard({
-  children,
-  as,
-  className = '',
-  ...rest
-}: GlassCardProps) {
-  const Tag = (as ?? 'div') as ElementType;
+const GlassCard = forwardRef<HTMLElement, GlassCardProps>(
+  ({ children, as, className = '', ...rest }, ref) => {
+    const Tag = (as ?? 'div') as ElementType;
 
-  return (
-    <Tag
-      className={`glass-frosted p-5 shadow-glass-frosted transition-shadow duration-250 ${className}`}
-      {...rest}
-    >
-      {children}
-    </Tag>
-  );
-}
+    return (
+      <Tag
+        ref={ref}
+        className={`glass-frosted p-5 shadow-glass-frosted transition-shadow duration-250 ${className}`}
+        {...rest}
+      >
+        {children}
+      </Tag>
+    );
+  }
+);
+
+GlassCard.displayName = 'GlassCard';
+
+export default GlassCard;

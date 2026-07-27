@@ -67,7 +67,7 @@
     --section-py: clamp(4rem, 10vw, 8rem);
 
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
   }
 
   /* -------------------------------------------------------------------------
@@ -83,7 +83,7 @@
     /* Lenis handles smooth scrolling; native smooth conflicts with it. */
     scroll-behavior: auto;
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
   }
 
   body {
@@ -100,7 +100,7 @@
     -webkit-user-select: none;
     user-select: none;
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
   }
 
   /* Focus visible — global ring style; components can override color */

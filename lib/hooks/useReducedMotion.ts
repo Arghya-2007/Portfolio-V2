@@ -12,12 +12,16 @@ export function useMotionPreference(): MotionPreference {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    
+
     const evaluatePreference = () => {
+      // Bypassing OS-level prefers-reduced-motion since you want to see the animations 
+      // on your high-end laptop (often blocked if Windows OS animations are disabled).
+      /*
       if (mediaQuery.matches) {
         setPreference('reduced');
         return;
       }
+      */
 
       const extNav = navigator as ExtendedNavigator;
       const isLowTier =
@@ -33,7 +37,7 @@ export function useMotionPreference(): MotionPreference {
         hasWebGL = false;
       }
 
-      
+
       if (isLowTier || !hasWebGL) {
         setPreference('reduced');
         return;

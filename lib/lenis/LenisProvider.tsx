@@ -39,6 +39,12 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
       lenis.on('scroll', ScrollTrigger.update);
     }
 
+    // Force a ScrollTrigger refresh after Lenis is initialized and after a short delay 
+    // to allow Next.js layouts to settle (fixes animations triggering on page load)
+    const timeoutId = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 200);
+
     // Handle smooth scrolling for anchor links globally
     const handleAnchorClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -67,6 +73,7 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     gsap.ticker.lagSmoothing(0);
 
     return () => {
+      clearTimeout(timeoutId);
       gsap.ticker.remove(tick);
       if (isFullMotion) {
         lenis.off('scroll', ScrollTrigger.update);
