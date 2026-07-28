@@ -31,8 +31,13 @@ export function useMotionPreference(): MotionPreference {
       let hasWebGL = true;
       try {
         const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (!gl) hasWebGL = false;
+        const gl = (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+        if (gl) {
+          const ext = gl.getExtension('WEBGL_lose_context');
+          if (ext) ext.loseContext();
+        } else {
+          hasWebGL = false;
+        }
       } catch {
         hasWebGL = false;
       }

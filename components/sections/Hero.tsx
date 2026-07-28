@@ -28,17 +28,25 @@ export default function Hero() {
   const taglineRef = useRef<HTMLParagraphElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const motionPreference = useMotionPreference();
+  const [mounted, setMounted] = useState(false);
   const [isModelReady, setIsModelReady] = useState(false);
   const [hasWebGL, setHasWebGL] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
   // Check WebGL and Mobile on mount
   useEffect(() => {
+    setMounted(true);
     // Simple canvas check
     try {
       const canvas = document.createElement('canvas');
-      const gl = (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
-      setHasWebGL(!!gl);
+      const gl = (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+      if (gl) {
+        const ext = gl.getExtension('WEBGL_lose_context');
+        if (ext) ext.loseContext();
+        setHasWebGL(true);
+      } else {
+        setHasWebGL(false);
+      }
     } catch {
       setHasWebGL(false);
     }
@@ -51,7 +59,7 @@ export default function Hero() {
     return () => mobileQuery.removeEventListener('change', listener);
   }, []);
 
-  const isHero3DMode = motionPreference === 'full' && hasWebGL && !isMobile;
+  const isHero3DMode = mounted && motionPreference === 'full' && hasWebGL && !isMobile;
 
   // Headline Hover Effects (Gradient Shift + Explode)
   useHeadlineHoverEffects(h1Ref, isModelReady);
@@ -73,17 +81,20 @@ export default function Hero() {
       });
 
       // 3D canvas overlay fades and scales down as hero scrolls out
-      gsap.to('[data-hero-canvas]', {
-        scale: 0.9,
-        opacity: 0,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 1,
-        }
-      });
+      const canvasEl = el.querySelector('[data-hero-canvas]');
+      if (canvasEl) {
+        gsap.to(canvasEl, {
+          scale: 0.9,
+          opacity: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 1,
+          }
+        });
+      }
     });
   }); // Empty deps, runs once
 
@@ -287,11 +298,22 @@ export default function Hero() {
     }
   }, [isModelReady]);
 
-  // Fallback for reduced motion or mobile view
-  useReducedScrollReveal(containerRef);
+  // Fallback timeout to prevent infinite loading screen if 3D model hangs
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (isHero3DMode && !isModelReady) {
+      timeoutId = setTimeout(() => {
+        setIsModelReady(true);
+      }, 8000); // Force reveal after 8 seconds
+    }
+    return () => clearTimeout(timeoutId);
+  }, [isHero3DMode, isModelReady]);
 
-  // Helper class for fallback reveal logic
-  const fallbackRevealClass = !isHero3DMode ? 'reveal-hidden' : '';
+  // Fallback for reduced motion or mobile view
+  useReducedScrollReveal(containerRef, !isHero3DMode);
+
+  // Helper class for fallback reveal logic (using CSS animation instead of scroll observer for Hero)
+  const fallbackRevealClass = !isHero3DMode ? 'hero-mobile-reveal' : '';
 
   return (
     <section

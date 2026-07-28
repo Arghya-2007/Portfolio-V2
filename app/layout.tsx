@@ -5,6 +5,7 @@ import LenisProvider from "@/lib/lenis/LenisProvider";
 import CustomCursor from "@/components/layout/CustomCursor";
 import SiteEntryLoader from "@/components/layout/SiteEntryLoader";
 import BackgroundParticles from "@/components/layout/BackgroundParticles";
+import LiquidGlassFilter from "@/components/ui/LiquidGlassFilter";
 
 const displayFont = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -59,6 +60,7 @@ export default function RootLayout({
         <BackgroundParticles />
         <LenisProvider>
           <CustomCursor />
+          <LiquidGlassFilter />
           {children}
         </LenisProvider>
       </body>

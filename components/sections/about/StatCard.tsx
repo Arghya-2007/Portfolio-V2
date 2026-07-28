@@ -17,7 +17,6 @@ export default function StatCard({ label, value, icon: Icon, delay = 0 }: StatCa
   const containerRef = useRef<HTMLDivElement>(null);
   const numberRef = useRef<HTMLSpanElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
   const motionPreference = useMotionPreference();
   const isNumeric = typeof value === 'number';
 
@@ -82,25 +81,6 @@ export default function StatCard({ label, value, icon: Icon, delay = 0 }: StatCa
     // Quick snappy lift & scale
     gsap.to(containerRef.current, { y: -4, scale: 1.03, duration: 0.25, ease: 'power2.out' });
     
-    // Glowing border + shadow fade in
-    if (glowRef.current) {
-      gsap.to(glowRef.current, { opacity: 1, duration: 0.3, ease: 'power2.out' });
-      // Animate the gradient angle continuously while hovering
-      // Note: animating CSS custom properties requires CSS.registerProperty, which isn't globally reliable yet,
-      // so we use a proxy object to tween the variable.
-      gsap.fromTo(
-        glowRef.current, 
-        { '--gradient-angle': '0deg' },
-        { 
-          '--gradient-angle': '360deg', 
-          duration: 2, 
-          repeat: -1, 
-          ease: 'none',
-          overwrite: 'auto'
-        }
-      );
-    }
-
     // Icon micro-bounce
     if (iconRef.current) {
       const iconTl = gsap.timeline();
@@ -120,35 +100,57 @@ export default function StatCard({ label, value, icon: Icon, delay = 0 }: StatCa
     if (motionPreference !== 'full') return;
     
     gsap.to(containerRef.current, { y: 0, scale: 1, duration: 0.3, ease: 'power2.out' });
-    
-    if (glowRef.current) {
-      gsap.to(glowRef.current, { opacity: 0, duration: 0.3, ease: 'power2.inOut', overwrite: 'auto' });
-    }
   };
 
   return (
-    <GlassCard 
+    <div 
       ref={containerRef}
-      as="div" 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative flex flex-col p-5 transition-colors duration-300 ${motionPreference !== 'full' ? 'hover:border-white/20 hover:shadow-glow-primary/10' : 'opacity-0 cursor-default'}`}
+      className={`relative h-full rounded-[20px] group ${motionPreference !== 'full' ? 'hover:shadow-glow-primary/10' : 'opacity-0 cursor-default'}`}
     >
-      {/* Animated Glowing Border (CSS variables updated by GSAP) */}
+      {/* Google Brand Conic Gradient Hover Shadow */}
       <div 
-        ref={glowRef}
-        className="absolute inset-0 pointer-events-none rounded-[inherit] opacity-0"
-        style={{
-          // @ts-expect-error: Custom CSS property for gradient animation
-          '--gradient-angle': '0deg',
-          padding: '1.5px',
-          background: 'linear-gradient(var(--gradient-angle), var(--accent-400), var(--primary-500), var(--accent-400))',
+        className="absolute inset-0 rounded-[20px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 z-0 pointer-events-none"
+        style={{ 
+          padding: '10px',
           WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
           WebkitMaskComposite: 'xor',
           maskComposite: 'exclude',
-          boxShadow: 'inset 0 0 20px rgba(45, 212, 191, 0.1)'
+          filter: 'blur(20px)' 
         }}
-      />
+      >
+        <div 
+          className="absolute inset-[-100%] motion-safe:animate-spin"
+          style={{
+            background: 'conic-gradient(from 0deg at 50% 50%, #4285F4 0deg, #EA4335 90deg, #FBBC05 180deg, #34A853 270deg, #4285F4 360deg)',
+            animationDuration: '4s'
+          }}
+        />
+      </div>
+
+      <GlassCard 
+        as="div" 
+        className="relative flex flex-col h-full overflow-hidden transition-shadow duration-500 z-10 p-5"
+      >
+        {/* Google Brand Conic Gradient Hover Border Effect */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000 z-20 rounded-[20px]" 
+          style={{
+            padding: '2px',
+            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+          }}
+        >
+          <div 
+            className="absolute inset-[-100%] motion-safe:animate-spin"
+            style={{
+              background: 'conic-gradient(from 0deg at 50% 50%, #4285F4 0deg, #EA4335 90deg, #FBBC05 180deg, #34A853 270deg, #4285F4 360deg)',
+              animationDuration: '4s'
+            }}
+          />
+        </div>
 
       <div className="flex items-center gap-3 mb-2 relative z-10">
         <div ref={iconRef} className="text-primary-500 transform-gpu">
@@ -162,5 +164,6 @@ export default function StatCard({ label, value, icon: Icon, delay = 0 }: StatCa
         <span ref={numberRef} className="inline-block transform-gpu origin-left">{value}</span>
       </dd>
     </GlassCard>
+    </div>
   );
 }

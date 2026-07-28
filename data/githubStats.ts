@@ -6,8 +6,8 @@
 import type { GithubStat } from './types';
 
 export const githubStats: GithubStat[] = [
-  { label: 'Repositories', value: 12 },
-  { label: 'Stars', value: 3 },
+  { label: 'Repositories', value: "12  Repositories" },
+  { label: 'Stars', value: "3  Stars" },
 ];
 
 // NOTE: The actual stats embed (streak card, top languages, contribution graph)

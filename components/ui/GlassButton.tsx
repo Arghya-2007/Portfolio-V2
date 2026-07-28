@@ -39,14 +39,14 @@ interface SharedProps {
 /* Button-mode props */
 interface ButtonModeProps
   extends SharedProps,
-    Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof SharedProps> {
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof SharedProps> {
   href?: undefined;
 }
 
 /* Anchor-mode props */
 interface AnchorModeProps
   extends SharedProps,
-    Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof SharedProps> {
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof SharedProps> {
   href: string;
 }
 
@@ -59,7 +59,7 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
 };
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary:   'border-primary-500/60 text-text-primary hover:border-primary-500 hover:shadow-glass-liquid-hover hover:shadow-glow-primary',
+  primary: 'border-white/18 text-text-primary hover:border-white/30 hover:shadow-glass-liquid-hover',
   secondary: 'border-white/18 text-text-secondary hover:border-white/35 hover:text-text-primary hover:shadow-glass-liquid-hover',
 };
 
@@ -99,7 +99,7 @@ export default function GlassButton(props: GlassButtonProps) {
     // Only apply hover effects on fine pointer devices
     const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (motionPreference !== 'full' || !isFinePointer) return;
-    
+
     if (sheenRef.current) {
       gsap.fromTo(
         sheenRef.current,
@@ -107,17 +107,55 @@ export default function GlassButton(props: GlassButtonProps) {
         { xPercent: 100, duration: 0.6, ease: 'power2.inOut', overwrite: 'auto' }
       );
     }
-    
+
     if (buttonRef.current) {
       // Bounce micro-interaction
       gsap.fromTo(
         buttonRef.current,
         { scale: 1, y: 0 },
-        { scale: 0.95, y: -4, duration: 0.4, ease: 'elastic.out(1, 0.4)', overwrite: 'auto', onComplete: () => {
-          gsap.to(buttonRef.current, { scale: 1, y: 0, duration: 0.4, ease: 'elastic.out(1, 0.4)' });
-        }}
+        {
+          scale: 0.95, y: -4, duration: 0.4, ease: 'elastic.out(1, 0.4)', overwrite: 'auto', onComplete: () => {
+            gsap.to(buttonRef.current, { scale: 1, y: 0, duration: 0.4, ease: 'elastic.out(1, 0.4)' });
+          }
+        }
       );
     }
+  };
+
+  /* ── Liquid glass: pointer-tracked specular highlight ── */
+  const handlePointerMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (motionPreference !== 'full' || !buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    buttonRef.current.style.setProperty('--pointer-x', `${x}%`);
+    buttonRef.current.style.setProperty('--pointer-y', `${y}%`);
+  };
+
+  const handlePointerLeave = () => {
+    if (motionPreference !== 'full' || !buttonRef.current) return;
+    buttonRef.current.style.setProperty('--pointer-x', '50%');
+    buttonRef.current.style.setProperty('--pointer-y', '50%');
+  };
+
+  /* ── Liquid glass: asymmetric squish + ripple on press ── */
+  const handleSquish = (e: React.MouseEvent<HTMLElement>) => {
+    if (motionPreference !== 'full' || !buttonRef.current) return;
+
+    // Asymmetric squish timeline
+    const tl = gsap.timeline({ overwrite: 'auto' });
+    tl.to(buttonRef.current, { scaleX: 1.06, scaleY: 0.92, duration: 0.12, ease: 'power2.out' })
+      .to(buttonRef.current, { scaleX: 0.97, scaleY: 1.04, duration: 0.25, ease: 'elastic.out(1.2, 0.35)' })
+      .to(buttonRef.current, { scaleX: 1, scaleY: 1, duration: 0.4, ease: 'elastic.out(1, 0.4)' });
+
+    // Ripple at click point
+    const rect = buttonRef.current.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'liquid-ripple';
+    ripple.style.left = `${e.clientX - rect.left}px`;
+    ripple.style.top = `${e.clientY - rect.top}px`;
+    buttonRef.current.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
   };
 
   const classes = [
@@ -145,11 +183,14 @@ export default function GlassButton(props: GlassButtonProps) {
     /* Anchor mode */
     const anchorProps = rest as Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>;
     return (
-      <a 
+      <a
         ref={buttonRef as React.RefObject<HTMLAnchorElement>}
-        href={href} 
-        className={classes} 
+        href={href}
+        className={classes}
         onMouseEnter={handleMouseEnter}
+        onMouseMove={handlePointerMove}
+        onMouseLeave={handlePointerLeave}
+        onMouseDown={handleSquish}
         {...anchorProps}
       >
         {innerContent}
@@ -160,11 +201,14 @@ export default function GlassButton(props: GlassButtonProps) {
   /* Button mode */
   const buttonProps = rest as ButtonHTMLAttributes<HTMLButtonElement>;
   return (
-    <button 
+    <button
       ref={buttonRef as React.RefObject<HTMLButtonElement>}
-      type="button" 
-      className={classes} 
+      type="button"
+      className={classes}
       onMouseEnter={handleMouseEnter}
+      onMouseMove={handlePointerMove}
+      onMouseLeave={handlePointerLeave}
+      onMouseDown={handleSquish}
       {...buttonProps}
     >
       {innerContent}

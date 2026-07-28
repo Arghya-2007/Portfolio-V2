@@ -5,7 +5,7 @@
 // Phase 6 — Premium Upgrade: TerminalCard, StatCard, BeliefQuote, Master Timeline, Ambient Particles.
 // Background: bg-1.jpg (cool tone, alternates with Hero warm).
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { profile } from '@/data/profile';
@@ -35,7 +35,17 @@ function buildStats(p: typeof profile, gh: typeof githubStats) {
 function AmbientParticles() {
   const containerRef = useRef<HTMLDivElement>(null);
   const motionPreference = useMotionPreference();
-  const [particles] = useState(() => Array.from({ length: 6 })); // 6 particles
+  const [particles, setParticles] = useState<{ top: string; left: string }[]>([]);
+
+  useEffect(() => {
+    // Generate positions only on the client to avoid hydration mismatches
+    setParticles(
+      Array.from({ length: 6 }).map(() => ({
+        top: `${10 + Math.random() * 80}%`,
+        left: `${10 + Math.random() * 80}%`,
+      }))
+    );
+  }, []);
 
   useScrollAnimation(containerRef, (ctx, el) => {
     if (motionPreference !== 'full') return;
@@ -55,19 +65,19 @@ function AmbientParticles() {
         delay: i * 0.5
       });
     });
-  });
+  }, [particles.length]); // Add dependency so GSAP runs after particles are rendered
 
-  if (motionPreference !== 'full') return null;
+  if (motionPreference !== 'full' || particles.length === 0) return null;
 
   return (
     <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
-      {particles.map((_, i) => (
+      {particles.map((pos, i) => (
         <div
           key={i}
           className="ambient-particle absolute w-1 h-1 rounded-full bg-accent-400 shadow-[0_0_12px_2px_rgba(45,212,191,0.6)]"
           style={{
-            top: `${10 + Math.random() * 80}%`,
-            left: `${10 + Math.random() * 80}%`,
+            top: pos.top,
+            left: pos.left,
             opacity: 0,
           }}
         />
@@ -185,7 +195,7 @@ export default function About() {
                 </p>
               </div>
 
-              <div className="mt-auto pb-4">
+              <div className="mt-auto pb-12 lg:pb-20">
                 <BeliefQuote quote={profile.belief} />
               </div>
             </div>

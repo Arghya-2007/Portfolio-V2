@@ -25,6 +25,7 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
+  const navPillRef = useRef<HTMLElement>(null);
   const motionPreference = useMotionPreference();
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -44,6 +45,22 @@ export default function Navbar() {
     });
   });
 
+  /* ── Liquid glass: bar-wide specular highlight tracking ── */
+  const handleNavPointerMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (motionPreference !== 'full' || !navPillRef.current) return;
+    const rect = navPillRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    navPillRef.current.style.setProperty('--pointer-x', `${x}%`);
+    navPillRef.current.style.setProperty('--pointer-y', `${y}%`);
+  };
+
+  const handleNavPointerLeave = () => {
+    if (motionPreference !== 'full' || !navPillRef.current) return;
+    navPillRef.current.style.setProperty('--pointer-x', '50%');
+    navPillRef.current.style.setProperty('--pointer-y', '50%');
+  };
+
   return (
     /* Outer strip — full-width, fixed, provides the z-index layer */
     <header 
@@ -59,6 +76,7 @@ export default function Navbar() {
         on content underneath the transparent edges).
       */}
       <nav
+        ref={navPillRef}
         role="navigation"
         aria-label="Primary navigation"
         className={`glass-liquid pointer-events-auto w-full max-w-3xl flex items-center justify-between transition-all duration-300 ease-out rounded-2xl border ${
@@ -66,6 +84,8 @@ export default function Navbar() {
             ? 'px-5 py-2 bg-bg-primary/70 border-white/10'
             : 'px-5 py-3 bg-bg-primary/50 border-white/5'
         }`}
+        onMouseMove={handleNavPointerMove}
+        onMouseLeave={handleNavPointerLeave}
       >
         {/* Logo / name */}
         <Link

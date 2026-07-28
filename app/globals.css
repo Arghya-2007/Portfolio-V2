@@ -172,11 +172,21 @@
     semi-transparent bg (Rules.md §6.2).
   */
   .glass-liquid {
+    position: relative;
+    overflow: hidden;
     background: var(--bg-secondary);
     /* fallback */
     border: 1px solid var(--liquid-border);
     border-radius: 999px;
     box-shadow: var(--liquid-shadow);
+    --pointer-x: 50%;
+    --pointer-y: 50%;
+  }
+
+  /* Ensure child content sits above pseudo-element layers */
+  .glass-liquid>* {
+    position: relative;
+    z-index: 1;
   }
 
   @supports (backdrop-filter: blur(1px)) {
@@ -184,6 +194,60 @@
       background: var(--liquid-bg);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+
+    /* Distortion layer — real refraction via SVG feTurbulence + feDisplacementMap */
+    .glass-liquid::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      filter: url(#liquid-distortion);
+      z-index: 0;
+      pointer-events: none;
+    }
+  }
+
+  /* Cursor-tracked specular highlight */
+  .glass-liquid::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle 120px at var(--pointer-x) var(--pointer-y),
+        rgba(255, 255, 255, 0.18),
+        transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .glass-liquid:hover::after {
+    opacity: 1;
+  }
+
+  /* Ripple burst on click — spawned via JS, removed on animationend */
+  .liquid-ripple {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    margin: -4px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent 70%);
+    pointer-events: none;
+    z-index: 3;
+    animation: liquidRippleExpand 0.6s ease-out forwards;
+  }
+
+  @keyframes liquidRippleExpand {
+    to {
+      width: 200px;
+      height: 200px;
+      margin: -100px;
+      opacity: 0;
     }
   }
 
@@ -247,6 +311,24 @@
     opacity: 1;
     transform: none;
     transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .hero-mobile-reveal {
+    opacity: 0;
+    animation: heroMobileReveal 0.8s ease-out forwards;
+    animation-delay: 0.2s;
+  }
+
+  @keyframes heroMobileReveal {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   /* --- Parallax Background ----------------------------------------------- */

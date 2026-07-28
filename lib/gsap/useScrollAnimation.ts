@@ -51,12 +51,12 @@ export function useScrollAnimation(
  * A lightweight alternative for reduced-motion mode that just uses 
  * IntersectionObserver to add a visible class.
  */
-export function useReducedScrollReveal(containerRef: RefObject<HTMLElement>) {
+export function useReducedScrollReveal(containerRef: RefObject<HTMLElement>, forceEnable: boolean = false) {
   const motionPreference = useMotionPreference();
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el || motionPreference === 'full') return;
+    if (!el || (motionPreference === 'full' && !forceEnable)) return;
 
     // In reduced/none mode, we just add a class when the element comes into view
     // The actual CSS is defined in globals.css (.reveal-hidden -> .reveal-visible)
@@ -83,5 +83,5 @@ export function useReducedScrollReveal(containerRef: RefObject<HTMLElement>) {
     }
 
     return () => observer.disconnect();
-  }, [motionPreference, containerRef]);
+  }, [motionPreference, containerRef, forceEnable]);
 }
