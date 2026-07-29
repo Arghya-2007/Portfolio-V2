@@ -6,6 +6,7 @@ import CustomCursor from "@/components/layout/CustomCursor";
 import SiteEntryLoader from "@/components/layout/SiteEntryLoader";
 import BackgroundParticles from "@/components/layout/BackgroundParticles";
 import LiquidGlassFilter from "@/components/ui/LiquidGlassFilter";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const displayFont = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -62,6 +63,7 @@ export default function RootLayout({
           <CustomCursor />
           <LiquidGlassFilter />
           {children}
+          <SpeedInsights />
         </LenisProvider>
       </body>
     </html>
