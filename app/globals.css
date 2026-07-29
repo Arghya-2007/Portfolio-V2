@@ -56,7 +56,7 @@
     --text-gradient: linear-gradient(90deg, #38BDF8, #7C3AED, #FF6B4A);
 
     /* Section overlay (always applied over background images) */
-    --section-overlay: linear-gradient(to bottom, rgba(5, 5, 10, 0.75), rgba(5, 5, 10, 0.92));
+    --section-overlay: linear-gradient(to bottom, rgba(5, 5, 10, 0.65), rgba(5, 5, 10, 0.85));
 
     /* --- Fluid Type Scale (Design.md §3) ---------------------------------- */
     --fs-h1: clamp(2.5rem, 6vw, 6rem);
@@ -142,6 +142,32 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     padding-bottom: 0.05em;
+  }
+
+  /* --- Premium Hover Text (Background Texture) ---------------------------- */
+  .premium-hover-text {
+    color: transparent;
+    background-image: 
+      linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 25%, #ffffff 50%, rgba(255,255,255,0.6) 75%, transparent 100%),
+      linear-gradient(0deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03));
+    background-size: 0% 100%, 100% 100%;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    transition: background-size 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: auto;
+    cursor: default;
+  }
+
+  .premium-hover-text:hover {
+    background-size: 100% 100%, 100% 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .premium-hover-text {
+      transition: none;
+    }
   }
 
   /* --- Display Type — apply to H1 / H2 heading elements ------------------ */
@@ -263,13 +289,16 @@
   .glass-frosted {
     background: rgba(5, 5, 10, 0.6);
     /* fallback */
-    border: 1px solid var(--frosted-border);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 0 40px rgba(124, 58, 237, 0.08);
   }
 
   @supports (backdrop-filter: blur(1px)) {
     .glass-frosted {
-      background: var(--frosted-bg);
+      background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
@@ -339,6 +368,169 @@
   [data-parallax-bg] {
     will-change: transform;
     height: 135% !important;
+  }
+
+  /* --- Skills Section: Marquee ------------------------------------------- */
+  /*
+    Two-row infinite marquee. Row 1 scrolls left→right, Row 2 right→left.
+    CSS-only loop — no GSAP (lighter, smoother for continuous animation).
+    Pausing is handled via .marquee-paused class toggled from React on hover/focus.
+  */
+  @keyframes marquee-ltr {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-33.3334%); }
+  }
+
+  @keyframes marquee-rtl {
+    from { transform: translateX(-33.3334%); }
+    to   { transform: translateX(0); }
+  }
+
+  .marquee-track-ltr {
+    animation: marquee-ltr 40s linear infinite;
+    will-change: transform;
+  }
+
+  .marquee-track-rtl {
+    animation: marquee-rtl 44s linear infinite;
+    will-change: transform;
+  }
+
+  /* When .marquee-paused is on the strip wrapper, stop both tracks */
+  .marquee-paused .marquee-track-ltr,
+  .marquee-paused .marquee-track-rtl {
+    animation-play-state: paused;
+  }
+
+  /* Fade-edge masks on the strip container */
+  .marquee-fade-edges {
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%
+    );
+  }
+
+  /* Reduced-motion: disable all marquee animations */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track-ltr,
+    .marquee-track-rtl {
+      animation: none;
+      transform: none;
+    }
+  }
+
+  /* --- Skills Section: Horizontal Scroll --------------------------------- */
+  /*
+    The horizontal scroll track is transformed via GSAP ScrollTrigger scrub.
+    will-change is set here; GSAP removes it after the animation.
+  */
+  .skills-hscroll-pin {
+    overflow: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .skills-hscroll-pin::-webkit-scrollbar {
+    display: none;
+  }
+
+  .skills-hscroll-track {
+    display: flex;
+    flex-wrap: nowrap;
+    will-change: transform;
+  }
+
+  /* Card scale/opacity transition — GSAP overrides these values via scrub */
+  .skills-category-card {
+    flex-shrink: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Progress indicator dots */
+  .skills-progress-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+    transition: background 0.3s ease, transform 0.3s ease, width 0.3s ease, height 0.3s ease;
+    cursor: pointer;
+  }
+
+  .skills-progress-dot.active {
+    background: var(--primary-500);
+    width: 24px;
+    height: 6px;
+    border-radius: 999px;
+    transform: none;
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.4);
+  }
+
+  /* --- Skills Section: Progress Ring (Acquiring category) ---------------- */
+  /*
+    SVG circular progress ring around each skill icon in the acquiring card.
+    ~50% fill signals "ongoing", not a precise metric.
+    Styled in accent-cyan — consistent with cyan = learning/infra semantic.
+  */
+  .progress-ring-track {
+    stroke: rgba(56, 189, 248, 0.25);
+    fill: none;
+  }
+
+  .progress-ring-fill {
+    stroke: var(--accent-500);
+    fill: none;
+    stroke-linecap: round;
+    /* Animation on card enter — triggered via JS class add */
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* --- Acquiring badge pulse animation ---------------------------------- */
+  @keyframes acquiring-badge-pulse {
+    0%, 100% { opacity: 0.7; box-shadow: 0 0 8px rgba(56, 189, 248, 0.2); }
+    50%      { opacity: 1;   box-shadow: 0 0 16px rgba(56, 189, 248, 0.4); }
+  }
+
+  .acquiring-badge-pulse {
+    animation: acquiring-badge-pulse 3s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .acquiring-badge-pulse {
+      animation: none;
+    }
+  }
+
+  /* --- Card top gradient accent border ---------------------------------- */
+  .card-top-accent {
+    position: relative;
+  }
+
+  .card-top-accent::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-500), transparent);
+    border-radius: 20px 20px 0 0;
+    z-index: 1;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-top-accent-cyan::before {
+    background: linear-gradient(90deg, var(--accent-500), transparent);
   }
 
   /* --- High-Tier Glass Quality Overrides --------------------------------- */

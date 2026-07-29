@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { Environment, Lightformer } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { HalfFloatType } from 'three';
@@ -34,8 +34,23 @@ function checkWebGLSupport() {
  * ResponsiveGroup — dynamically positions the model based on canvas size
  */
 function ResponsiveGroup({ children }: { children: React.ReactNode }) {
-  const { size } = useThree();
-  const isMobileView = size.width < 1024;
+  // Use window width instead of canvas size to avoid R3F initialization bugs
+  // when canvas is scaled or hidden during entrance animations.
+  // Since Canvas is only mounted on the client, window is guaranteed to be defined.
+  const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 1024);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobileView(window.innerWidth < 1024);
+    };
+    
+    // Initial check
+    checkMobile();
+    
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <group position={isMobileView ? [0, 0, 0] : [1.8, 0, 0]}>
       {children}

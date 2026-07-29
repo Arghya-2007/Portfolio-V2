@@ -83,7 +83,7 @@ export default function SectionHeading({
 
       {/* Optional subheading — body copy beneath the heading */}
       {subheading && (
-        <p className="font-body text-text-secondary mt-3 max-w-xl leading-body text-fluid-body">
+        <p className="font-body text-text-secondary mt-4 max-w-xl leading-body text-lg border-l-[3px] border-primary-500 pl-4">
           {subheading}
         </p>
       )}

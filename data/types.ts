@@ -52,11 +52,34 @@ export interface Profile {
 
 export type SkillStatus = 'core' | 'acquiring';
 
+/**
+ * A single technology entry within a skill category.
+ * iconType distinguishes brand SVGs (simple-icons) from abstract-concept fallbacks (lucide).
+ */
+export interface Skill {
+  /** Display name, e.g. "React.js" */
+  name: string;
+  /**
+   * For simple-icons: the slug key used in `si<PascalCase>` exports, e.g. "react".
+   * For lucide: the PascalCase component name, e.g. "Globe".
+   */
+  iconKey: string;
+  /** Where to source the icon from */
+  iconType: 'simple-icons' | 'lucide';
+  /**
+   * Brand hex color from simple-icons (without #), e.g. "61DAFB".
+   * Used for hover glow effect. Omit for lucide icons.
+   */
+  brandHex?: string;
+  /** One-line factual description of this technology */
+  description: string;
+}
+
 export interface SkillCategory {
   title: string;
   /** Emoji used as a visual icon for the category header */
   emoji: string;
-  skills: string[];
+  skills: Skill[];
   /** 'acquiring' categories get a distinct visual treatment (dashed border / progress ring) */
   status: SkillStatus;
 }
