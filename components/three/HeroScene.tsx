@@ -7,6 +7,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { HalfFloatType } from 'three';
 import RobotModel from './RobotModel';
 import { useMotionPreference } from '@/lib/hooks/useReducedMotion';
+import { useDeviceTier, RENDER_QUALITY } from '@/lib/hooks/useDeviceTier';
 
 let isWebGLSupported: boolean | null = null;
 
@@ -54,6 +55,10 @@ export default function HeroScene({ onModelLoaded }: HeroSceneProps) {
   const [hasWebGL, setHasWebGL] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const motionPreference = useMotionPreference();
+  // Device tier — only meaningful when motionPreference === 'full'.
+  // 'high' tier raises the DPR ceiling and env map resolution for capable hardware.
+  const deviceTier = useDeviceTier();
+  const quality = RENDER_QUALITY[deviceTier];
 
   useEffect(() => {
     setMounted(true);
@@ -84,7 +89,10 @@ export default function HeroScene({ onModelLoaded }: HeroSceneProps) {
     >
       <div data-hero-canvas className="w-full h-full">
         <Canvas
-          dpr={[1, 2]}
+          // Standard tier: [1, 2] (proven safe default, unchanged).
+          // High tier: [1, 3] — Retina 3× displays render the model crisp
+          // instead of being capped the same as a standard display.
+          dpr={quality.canvasDpr}
           gl={{
             antialias: true,
             alpha: true,
@@ -111,7 +119,10 @@ export default function HeroScene({ onModelLoaded }: HeroSceneProps) {
           {/* Rim light from behind */}
           <directionalLight position={[0, 5, -10]} intensity={2.5} color="#7C3AED" />
 
-          <Environment resolution={256} background={false}>
+          {/* Standard tier: resolution 256 (existing safe default, unchanged).
+              High tier: resolution 512 — noticeably sharper reflections on the
+              robot model surface; still GPU-safe on capable hardware. */}
+          <Environment resolution={quality.envMapResolution} background={false}>
             {/* Custom reflections using Lightformers to give a moody aesthetic */}
             <Lightformer intensity={4} color="#7C3AED" position={[0, 5, -5]} scale={[10, 2, 1]} form="rect" />
             <Lightformer intensity={2} color="#67D8F9" position={[-5, 0, -5]} scale={[2, 10, 1]} form="rect" />

@@ -17,6 +17,7 @@ import MagneticWrapper from '@/components/ui/MagneticWrapper';
 import SectionHeading from '@/components/ui/SectionHeading';
 import { useScrollAnimation, useReducedScrollReveal } from '@/lib/gsap/useScrollAnimation';
 import { useMotionPreference } from '@/lib/hooks/useReducedMotion';
+import { useDeviceTier, RENDER_QUALITY } from '@/lib/hooks/useDeviceTier';
 
 /* Shared class string for glass input / textarea fields */
 const INPUT_BASE = [
@@ -37,6 +38,9 @@ const LABEL_BASE =
 export default function Contact() {
   const containerRef = useRef<HTMLElement>(null);
   const motionPreference = useMotionPreference();
+  // Device tier — drives section background image quality.
+  const deviceTier = useDeviceTier();
+  const quality = RENDER_QUALITY[deviceTier];
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -147,12 +151,13 @@ export default function Contact() {
       className="relative overflow-hidden"
     >
       {/* Background image — cool tone */}
+      {/* Standard tier: quality 75 (unchanged). High tier: 85. */}
       <Image
         src="/images/bg/bg-6.webp"
         alt=""
         aria-hidden="true"
         fill
-        quality={75}
+        quality={quality.imageQualitySection}
         className="object-cover object-center"
         sizes="100vw"
         data-parallax-bg

@@ -20,10 +20,14 @@ import GlassCard from '@/components/ui/GlassCard';
 import SectionHeading from '@/components/ui/SectionHeading';
 import { useScrollAnimation, useReducedScrollReveal } from '@/lib/gsap/useScrollAnimation';
 import { useMotionPreference } from '@/lib/hooks/useReducedMotion';
+import { useDeviceTier, RENDER_QUALITY } from '@/lib/hooks/useDeviceTier';
 
 export default function Skills() {
   const containerRef = useRef<HTMLElement>(null);
   const motionPreference = useMotionPreference();
+  // Device tier — drives section background image quality.
+  const deviceTier = useDeviceTier();
+  const quality = RENDER_QUALITY[deviceTier];
 
   useScrollAnimation(containerRef, (ctx, el) => {
     // Reveal section heading
@@ -98,12 +102,13 @@ export default function Skills() {
       className="relative overflow-hidden"
     >
       {/* Background image — warm tone */}
+      {/* Standard tier: quality 75 (unchanged). High tier: 85. */}
       <Image
         src="/images/bg/bg-3.webp"
         alt=""
         aria-hidden="true"
         fill
-        quality={75}
+        quality={quality.imageQualitySection}
         className="object-cover object-center"
         sizes="100vw"
         data-parallax-bg

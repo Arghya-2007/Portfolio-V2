@@ -18,6 +18,7 @@ import RotatingText from '@/components/ui/RotatingText';
 import { useScrollAnimation, useReducedScrollReveal } from '@/lib/gsap/useScrollAnimation';
 import { splitText, revertSplit } from '@/lib/gsap/splitText';
 import { useMotionPreference } from '@/lib/hooks/useReducedMotion';
+import { useDeviceTier, RENDER_QUALITY } from '@/lib/hooks/useDeviceTier';
 import { useHeadlineHoverEffects } from '@/lib/gsap/useHeadlineHoverEffects';
 import HeroScene from '@/components/three/HeroScene';
 import HeroLoadingScreen from '@/components/three/HeroLoadingScreen';
@@ -28,6 +29,9 @@ export default function Hero() {
   const taglineRef = useRef<HTMLParagraphElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const motionPreference = useMotionPreference();
+  // Device tier — drives image quality and canvas quality in HeroScene.
+  const deviceTier = useDeviceTier();
+  const quality = RENDER_QUALITY[deviceTier];
   const [mounted, setMounted] = useState(false);
   const [isModelReady, setIsModelReady] = useState(false);
   const [hasWebGL, setHasWebGL] = useState(true);
@@ -323,13 +327,15 @@ export default function Hero() {
       className="relative min-h-screen flex flex-col justify-center overflow-hidden"
     >
       {/* Background image — priority loaded (above fold) */}
+      {/* Standard tier: quality 85 (unchanged). High tier: 90 — richer */}
+      {/* source fidelity on capable displays/connections.               */}
       <Image
         src="/images/bg/bg-2.webp"
         alt=""
         aria-hidden="true"
         fill
         priority
-        quality={85}
+        quality={quality.imageQualityHero}
         className="object-cover object-center"
         sizes="100vw"
         data-parallax-bg

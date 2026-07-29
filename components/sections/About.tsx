@@ -19,6 +19,7 @@ import BeliefQuote from './about/BeliefQuote';
 
 import { useScrollAnimation, useReducedScrollReveal } from '@/lib/gsap/useScrollAnimation';
 import { useMotionPreference } from '@/lib/hooks/useReducedMotion';
+import { useDeviceTier, RENDER_QUALITY } from '@/lib/hooks/useDeviceTier';
 
 function buildStats(p: typeof profile, gh: typeof githubStats) {
   const reposStat = gh.find(s => s.label.toLowerCase().includes('repos'))?.value || 0;
@@ -90,6 +91,9 @@ export default function About() {
   const stats = buildStats(profile, githubStats);
   const containerRef = useRef<HTMLElement>(null);
   const motionPreference = useMotionPreference();
+  // Device tier — drives section background image quality.
+  const deviceTier = useDeviceTier();
+  const quality = RENDER_QUALITY[deviceTier];
 
   useScrollAnimation(containerRef, (ctx, el) => {
     if (motionPreference !== 'full') return;
@@ -146,12 +150,13 @@ export default function About() {
       className="relative overflow-hidden"
     >
       {/* Background image — cool tone */}
+      {/* Standard tier: quality 75 (unchanged). High tier: 85. */}
       <Image
         src="/images/bg/bg-4.webp"
         alt=""
         aria-hidden="true"
         fill
-        quality={75}
+        quality={quality.imageQualitySection}
         className="object-cover object-center"
         sizes="100vw"
         data-parallax-bg

@@ -340,4 +340,37 @@
     will-change: transform;
     height: 135% !important;
   }
+
+  /* --- High-Tier Glass Quality Overrides --------------------------------- */
+  /*
+    Applied when useDeviceTier() resolves 'high' and stamps
+    <html data-tier="high"> after hydration.
+
+    Only the blur radius / saturation per-element is enriched — the
+    simultaneous-blurred-element count cap (Rules.md §4.1) is NOT relaxed.
+    Standard-tier devices are completely unaffected (no data-tier attr = standard).
+
+    Justification: capable GPUs handle backdrop-filter compositing easily at
+    these values; the conservative baseline was chosen for broad safety, not
+    aesthetics. High-tier enrichment is additive only.
+  */
+  @supports (backdrop-filter: blur(1px)) {
+    /* Frosted panel: 12px → 16px — deeper panel depth on capable hardware */
+    [data-tier="high"] .glass-frosted {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* Liquid glass (Navbar + Buttons): 20px/180% → 24px/200% — richer refraction */
+    [data-tier="high"] .glass-liquid {
+      backdrop-filter: blur(24px) saturate(200%);
+      -webkit-backdrop-filter: blur(24px) saturate(200%);
+    }
+
+    /* Inner distortion layer on liquid glass: 2px → 3px — slightly more depth */
+    [data-tier="high"] .glass-liquid::before {
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+  }
 }
